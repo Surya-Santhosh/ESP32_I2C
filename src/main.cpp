@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Trenser Technology Solutions
 // All Rights Reserved
 //******************************************************************************
-// File    : main.c
+// File    : main.cpp
 // Summary : Read and write data for STM32.
 // Note    : None
 // Author  : Surya Santhosh

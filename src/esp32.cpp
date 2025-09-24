@@ -2,7 +2,7 @@
 // Copyright (c) 2025 Trenser Technology Solutions
 // All Rights Reserved 
 //******************************************************************************
-// File    : esp32.c
+// File    : esp32.cpp
 // Summary : Read and write data for STM32.
 // Note    : None
 // Author  : Surya Santhosh
@@ -20,7 +20,7 @@
 
 //***************************** Local Functions ********************************
 static bool esp32Read(uint8 ucAddress);
-static bool esp32Write(uint8 unAddress, uint8 unData);
+static bool esp32Write(uint8 ucAddress, uint8 unData);
 
 //*******************************.esp32Test.************************************
 // Purpose : Read and write data for STM32.
@@ -33,7 +33,7 @@ bool esp32Test()
 {
     bool blResult = false;
     String ucChoice = "";
-    uint8 unAddress = 0;
+    uint8 ucAddress = 0;
     uint8 unData = 0;
     
     if (Serial.available() > 0)
@@ -44,9 +44,9 @@ bool esp32Test()
         if (ucChoice.startsWith(WRITE))
         {
             if (NUM_DATA_TO_WRITE == sscanf(ucChoice.c_str(), "Write %x %x", 
-                                            &unAddress, &unData))
+                                            &ucAddress, &unData))
             {
-                if (true != esp32Write(unAddress, unData))
+                if (true != esp32Write(ucAddress, unData))
                 {
                     Serial.println("Error in esp32Write\n");
                 }
@@ -55,9 +55,9 @@ bool esp32Test()
         else if (ucChoice.startsWith(READ))
         {
             if (NUM_DATA_TO_READ == sscanf(ucChoice.c_str(), "Read %x", 
-                                            &unAddress))
+                                            &ucAddress))
             {
-                if (true != esp32Read(unAddress))
+                if (true != esp32Read(ucAddress))
                 {
                     Serial.println("Error in esp32Read\n");
                 }
@@ -80,14 +80,14 @@ bool esp32Test()
 // Return  : blResult
 // Notes   : None
 //******************************************************************************
-static bool esp32Write(uint8 unAddress, uint8 unData)
+static bool esp32Write(uint8 ucAddress, uint8 unData)
 {
     bool blResult = false;
     uint8 ucWriteAck = 0;
     
     Wire.beginTransmission(STM32_ADDRESS);
     Wire.write(WRITE_CMD);
-    Wire.write(unAddress);
+    Wire.write(ucAddress);
     Wire.write(unData);
 
     if (0 == Wire.endTransmission())
