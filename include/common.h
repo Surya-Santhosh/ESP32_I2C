@@ -41,7 +41,6 @@ typedef signed short int16;
 #define SIZE_WRITE_ACK              (1)
 #define SIZE_READ_DATA              (2)
 #define BAUD_RATE                   (115200)
-#define BAUD_RATE                   (115200)
 #define NEW_LINE                    ('\n')
 #define TWENTY_MS_DELAY             (20)
 
