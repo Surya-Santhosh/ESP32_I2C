@@ -43,6 +43,7 @@ typedef signed short int16;
 #define BAUD_RATE                   (115200)
 #define BAUD_RATE                   (115200)
 #define NEW_LINE                    ('\n')
+#define TWENTY_MS_DELAY             (20)
 
 //************************* Global Variables *********************************** 
 

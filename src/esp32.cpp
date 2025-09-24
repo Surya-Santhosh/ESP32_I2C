@@ -20,7 +20,7 @@
 
 //***************************** Local Functions ********************************
 static bool esp32Read(uint8 ucAddress);
-static bool esp32Write(uint8 unAddress, uint8 ucValue);
+static bool esp32Write(uint8 unAddress, uint8 unData);
 
 //*******************************.esp32Test.************************************
 // Purpose : Read and write data for STM32.
@@ -34,7 +34,7 @@ bool esp32Test()
     bool blResult = false;
     String ucChoice = "";
     uint8 unAddress = 0;
-    uint8 unValue = 0;
+    uint8 unData = 0;
     
     if (Serial.available() > 0)
     {
@@ -44,9 +44,9 @@ bool esp32Test()
         if (ucChoice.startsWith(WRITE))
         {
             if (NUM_DATA_TO_WRITE == sscanf(ucChoice.c_str(), "Write %x %x", 
-                                            &unAddress, &unValue))
+                                            &unAddress, &unData))
             {
-                if (true != esp32Write(unAddress, unValue))
+                if (true != esp32Write(unAddress, unData))
                 {
                     Serial.println("Error in esp32Write\n");
                 }
@@ -80,7 +80,7 @@ bool esp32Test()
 // Return  : blResult
 // Notes   : None
 //******************************************************************************
-static bool esp32Write(uint8 unAddress, uint8 ucValue)
+static bool esp32Write(uint8 unAddress, uint8 unData)
 {
     bool blResult = false;
     uint8 ucWriteAck = 0;
@@ -88,15 +88,13 @@ static bool esp32Write(uint8 unAddress, uint8 ucValue)
     Wire.beginTransmission(STM32_ADDRESS);
     Wire.write(WRITE_CMD);
     Wire.write(unAddress);
-    Wire.write(ucValue);
+    Wire.write(unData);
 
     if (0 == Wire.endTransmission())
     {
         Serial.print("Data send to STM32\n");
 
-        delay(20);
-
-        // Wire.setTimeOut(500);
+        delay(TWENTY_MS_DELAY);
 
         Wire.requestFrom(STM32_ADDRESS, SIZE_WRITE_ACK);
 
@@ -130,32 +128,31 @@ static bool esp32Write(uint8 unAddress, uint8 ucValue)
 static bool esp32Read(uint8 ucAddress)
 {
     bool blResult = false;
-    uint16 ucValue = 0;
+    uint8 unData = 0;
     uint8 ucReadeAck = 0;
 
     Wire.beginTransmission(STM32_ADDRESS);
     Wire.write(READ_CMD);
     Wire.write(ucAddress);
-    Wire.write(ucValue);
+    Wire.write(unData);
 
     if (0 == Wire.endTransmission())
     {
         Serial.println("Request send to STM32\n");
 
-        delay(20);
-        // Wire.setTimeOut(100);
+        delay(TWENTY_MS_DELAY);
 
         byte size = Wire.requestFrom(STM32_ADDRESS, SIZE_READ_DATA);
 
         if (Wire.available() == size)
         {
             ucReadeAck = Wire.read();
-            ucValue = Wire.read();
+            unData = Wire.read();
 
             if (READ_ACK == ucReadeAck)
             {
                 Serial.println("Data : ");
-                Serial.println(ucValue);
+                Serial.println(unData);
             }
 
             blResult = true;
