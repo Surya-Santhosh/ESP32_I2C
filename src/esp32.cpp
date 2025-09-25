@@ -26,7 +26,7 @@ static bool esp32Write(uint8 ucAt24c02Address, uint8 ucData);
 // Purpose : Read and write data for STM32.
 // Inputs  : None
 // Outputs : None
-// Return  : true
+// Return  : blResult
 // Notes   : None
 //******************************************************************************
 bool esp32ReadWriteHandler()
@@ -108,10 +108,6 @@ static bool esp32Write(uint8 ucAt24c02Address, uint8 ucData)
                 Serial.println("EEPROM Write Success\n");
 
                 blResult = true;
-            }
-            else
-            {
-                Serial.println("EEPROM Write Failed\n");
             }
         }
     }
