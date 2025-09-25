@@ -1,4 +1,4 @@
-//********************************* esp32 ***********************************
+//*********************************** esp32 ************************************
 // Copyright (c) 2025 Trenser Technology Solutions
 // All Rights Reserved 
 //******************************************************************************
@@ -19,8 +19,8 @@
 //**************************** Local Variables *********************************
 
 //***************************** Local Functions ********************************
-static bool esp32Read(uint8 ucAddress);
-static bool esp32Write(uint8 ucAddress, uint8 unData);
+static bool esp32Read(uint8 ucAt24c02Address);
+static bool esp32Write(uint8 ucAt24c02Address, uint8 ucData);
 
 //*******************************.esp32Test.************************************
 // Purpose : Read and write data for STM32.
@@ -29,37 +29,37 @@ static bool esp32Write(uint8 ucAddress, uint8 unData);
 // Return  : true
 // Notes   : None
 //******************************************************************************
-bool esp32Test()
+bool esp32ReadWriteHandler()
 {
     bool blResult = false;
     String ucChoice = "";
-    uint8 ucAddress = 0;
-    uint8 unData = 0;
+    uint8 ucAt24c02Address = 0;
+    uint8 ucData = 0;
     
     if (Serial.available() > 0)
     {
-        ucChoice = Serial.readStringUntil(NEW_LINE);
+        ucChoice = Serial.readStringUntil('\n');
         ucChoice.trim();
 
-        if (ucChoice.startsWith(WRITE))
+        if (ucChoice.startsWith("Write"))
         {
-            if (NUM_DATA_TO_WRITE == sscanf(ucChoice.c_str(), "Write %x %x", 
-                                            &ucAddress, &unData))
+            if (EOF != sscanf(ucChoice.c_str(), "Write %x %x", 
+                                            &ucAt24c02Address, &ucData))
             {
-                if (true != esp32Write(ucAddress, unData))
+                if (true == esp32Write(ucAt24c02Address, ucData))
                 {
-                    Serial.println("Error in esp32Write\n");
+                    blResult = true;
                 }
             }
         } 
-        else if (ucChoice.startsWith(READ))
+        else if (ucChoice.startsWith("Read"))
         {
-            if (NUM_DATA_TO_READ == sscanf(ucChoice.c_str(), "Read %x", 
-                                            &ucAddress))
+            if (EOF != sscanf(ucChoice.c_str(), "Read %x", 
+                                            &ucAt24c02Address))
             {
-                if (true != esp32Read(ucAddress))
+                if (true == esp32Read(ucAt24c02Address))
                 {
-                    Serial.println("Error in esp32Read\n");
+                    blResult = true;
                 }
             }
         }
@@ -69,26 +69,27 @@ bool esp32Test()
         }
     }
 
-    return true;
+    return blResult;
 }
 
 //*******************************.esp32Write.***********************************
 // Purpose : Write data to STM32.
-// Inputs  : unAddress - EEPROM Address.
-//         : unValue - Data to store.
+// Inputs  : ucAt24c02Address - Memory Address in AT24C02 where the data will 
+//           be stored.
+//         : ucData - Data to store.
 // Outputs : None
 // Return  : blResult
 // Notes   : None
 //******************************************************************************
-static bool esp32Write(uint8 ucAddress, uint8 unData)
+static bool esp32Write(uint8 ucAt24c02Address, uint8 ucData)
 {
     bool blResult = false;
     uint8 ucWriteAck = 0;
     
-    Wire.beginTransmission(STM32_ADDRESS);
+    Wire.beginTransmission(SLAVE_ADDRESS);
     Wire.write(WRITE_CMD);
-    Wire.write(ucAddress);
-    Wire.write(unData);
+    Wire.write(ucAt24c02Address);
+    Wire.write(ucData);
 
     if (0 == Wire.endTransmission())
     {
@@ -96,7 +97,7 @@ static bool esp32Write(uint8 ucAddress, uint8 unData)
 
         delay(TWENTY_MS_DELAY);
 
-        Wire.requestFrom(STM32_ADDRESS, SIZE_WRITE_ACK);
+        Wire.requestFrom(SLAVE_ADDRESS, SIZE_WRITE_ACK);
 
         if (Wire.available())
         {
@@ -105,14 +106,14 @@ static bool esp32Write(uint8 ucAddress, uint8 unData)
             if (WRITE_ACK == ucWriteAck)
             {
                 Serial.println("EEPROM Write Success\n");
+
+                blResult = true;
             }
             else
             {
                 Serial.println("EEPROM Write Failed\n");
             }
         }
-
-        blResult = true;
     }
 
     return blResult;
@@ -120,21 +121,21 @@ static bool esp32Write(uint8 ucAddress, uint8 unData)
 
 //*******************************.esp32Read.************************************
 // Purpose : Read data from STM32.
-// Inputs  : unAddress - EEPROM Address.
+// Inputs  : ucAt24c02Address - Memory Address in AT24C02 where the data is 
+//           read from.
 // Outputs : None
 // Return  : blResult
 // Notes   : None
 //******************************************************************************
-static bool esp32Read(uint8 ucAddress)
+static bool esp32Read(uint8 ucAt24c02Address)
 {
     bool blResult = false;
-    uint8 unData = 0;
+    uint8 ucData = 0;
     uint8 ucReadeAck = 0;
 
-    Wire.beginTransmission(STM32_ADDRESS);
+    Wire.beginTransmission(SLAVE_ADDRESS);
     Wire.write(READ_CMD);
-    Wire.write(ucAddress);
-    Wire.write(unData);
+    Wire.write(ucAt24c02Address);
 
     if (0 == Wire.endTransmission())
     {
@@ -142,20 +143,20 @@ static bool esp32Read(uint8 ucAddress)
 
         delay(TWENTY_MS_DELAY);
 
-        byte size = Wire.requestFrom(STM32_ADDRESS, SIZE_READ_DATA);
+        byte size = Wire.requestFrom(SLAVE_ADDRESS, SIZE_READ_DATA);
 
         if (Wire.available() == size)
         {
             ucReadeAck = Wire.read();
-            unData = Wire.read();
+            ucData = Wire.read();
 
             if (READ_ACK == ucReadeAck)
             {
                 Serial.println("Data : ");
-                Serial.println(unData);
-            }
+                Serial.println(ucData);
 
-            blResult = true;
+                blResult = true;
+            }
         }
     }
 

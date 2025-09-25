@@ -38,7 +38,7 @@ void setup()
 
 void loop() 
 {
-  if (true != esp32Test())
+  if (true != esp32ReadWriteHandler())
   {
     Serial.print("Error in uartTest");
   }

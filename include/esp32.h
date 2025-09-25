@@ -20,7 +20,7 @@
 //************************* Global Variables *********************************** 
 
 //************************* Forward Declarations ******************************* 
-bool esp32Test();
+bool esp32ReadWriteHandler();
 
 //********************** Inline Method Implementations ************************* 
 
